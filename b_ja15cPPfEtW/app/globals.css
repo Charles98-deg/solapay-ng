@@ -1,0 +1,97 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Core palette: Solana-inspired dark theme */
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #111111;
+  --card-foreground: #fafafa;
+  --popover: #111111;
+  --popover-foreground: #fafafa;
+
+  /* Brand: Solana purple */
+  --primary: #9945ff;
+  --primary-foreground: #ffffff;
+
+  /* Brand accent: Solana green */
+  --accent: #14f195;
+  --accent-foreground: #0a0a0a;
+
+  --secondary: #1a1a1a;
+  --secondary-foreground: #fafafa;
+  --muted: #161616;
+  --muted-foreground: #8a8a8a;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: #1f1f1f;
+  --input: #1a1a1a;
+  --ring: #9945ff;
+
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --font-sans: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Subtle ambient glow utility used across hero / cards */
+@layer utilities {
+  .glow-purple {
+    box-shadow: 0 0 60px -10px rgba(153, 69, 255, 0.45);
+  }
+  .glow-green {
+    box-shadow: 0 0 60px -10px rgba(20, 241, 149, 0.4);
+  }
+  .text-gradient-brand {
+    background: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .grid-bg {
+    background-image: linear-gradient(rgba(153, 69, 255, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(153, 69, 255, 0.07) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+}
