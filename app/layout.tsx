@@ -27,7 +27,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const network = WalletAdapterNetwork.Mainnet;
+  const network = WalletAdapterNetwork.Devnet;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
   const wallets = useMemo(
     () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
