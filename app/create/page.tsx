@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { ArrowLeft, Check, Copy, Link2, Sparkles } from "lucide-react"
 import { SiteNav } from "@/components/site-nav"
-import { freelancer } from "@/lib/mock-data"
+import { useWallet } from "@solana/wallet-adapter-react"
 
 type GeneratedLink = {
   id: string
@@ -19,7 +19,8 @@ function makeId() {
 }
 
 export default function CreatePaymentLinkPage() {
-  const [name, setName] = useState(freelancer.name)
+  const { publicKey } = useWallet()
+const [name, setName] = useState("")
   const [service, setService] = useState("")
   const [amount, setAmount] = useState<string>("")
   const [generated, setGenerated] = useState<GeneratedLink | null>(null)
@@ -35,7 +36,7 @@ export default function CreatePaymentLinkPage() {
       id,
       url: `${origin}/pay/${id}?name=${encodeURIComponent(name)}&service=${encodeURIComponent(
         service,
-      )}&amount=${encodeURIComponent(amount)}&wallet=${encodeURIComponent(freelancer.walletAddress)}`,
+      )}&amount=${encodeURIComponent(amount)}&wallet=${encodeURIComponent(publicKey?.toString() || "")}`,
       freelancer: name,
       service,
       amount: Number(amount),
