@@ -261,6 +261,7 @@ function SuccessState({
   name: string
   txSignature: string
 }) {
+  const explorerUrl = "https://explorer.solana.com/tx/" + txSignature + "?cluster=devnet"
   return (
     <div className="rounded-xl border border-green-400/40 bg-green-400/5 p-5 text-center">
       <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white">
@@ -272,12 +273,12 @@ function SuccessState({
       </p>
       {txSignature && (
         
-          href={"https://explorer.solana.com/tx/" + txSignature + "?cluster=devnet"}
+          href={explorerUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-3 block font-mono text-[11px] text-purple-400 underline"
         >
-          View on Solana Explorer ↗
+          View on Solana Explorer
         </a>
       )}
     </div>
