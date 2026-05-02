@@ -149,10 +149,7 @@ const [name, setName] = useState("")
             <div className="flex items-center gap-3 rounded-lg border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
               <Sparkles className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
               <p>
-                Funds settle directly to your wallet ending in{" "}
-                <span className="font-mono text-foreground">
-                  {freelancer.walletAddress.slice(-6)}
-                </span>
+                Funds settle directly to your connected wallet. SolaPay never holds your money.
                 . SolaPay never holds your money.
               </p>
             </div>
