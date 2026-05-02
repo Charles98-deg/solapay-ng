@@ -272,7 +272,7 @@ function SuccessState({
       </p>
       {txSignature && (
         
-          href={`https://explorer.solana.com/tx/${txSignature}?cluster=devnet`}
+          href={"https://explorer.solana.com/tx/" + txSignature + "?cluster=devnet"}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-3 block font-mono text-[11px] text-purple-400 underline"
