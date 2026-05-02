@@ -35,7 +35,7 @@ export default function CreatePaymentLinkPage() {
       id,
       url: `${origin}/pay/${id}?name=${encodeURIComponent(name)}&service=${encodeURIComponent(
         service,
-      )}&amount=${encodeURIComponent(amount)}`,
+      )}&amount=${encodeURIComponent(amount)}&wallet=${encodeURIComponent(freelancer.walletAddress)}`,
       freelancer: name,
       service,
       amount: Number(amount),
