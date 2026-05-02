@@ -270,9 +270,8 @@ function SuccessState({
       <p className="mt-3 text-base font-semibold">Payment sent</p>
       <p className="mt-1 text-sm text-muted-foreground">
         {amount} SOL sent to {name}.
- {txSignature && <p className="mt-3 font-mono text-[11px] text-muted-foreground">{txSignature.slice(0, 20)}...</p>}
-        </a>
-      )}
+      </p>
+      {txSignature && <p className="mt-3 font-mono text-[11px] text-muted-foreground">{txSignature.slice(0, 20)}...</p>}
     </div>
   )
 }
