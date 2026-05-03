@@ -208,13 +208,9 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   
-                    href={"https://explorer.solana.com/tx/" + tx.signature + "?cluster=devnet"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-purple-400 underline shrink-0"
-                  >
-                    View
-                  </a>
+                    <span className="text-xs text-purple-400 shrink-0">
+                    {tx.signature.slice(0, 8)}...
+                  </span>
                 </li>
               ))}
             </ul>
