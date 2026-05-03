@@ -1,6 +1,10 @@
+"use client"
+
 import Link from "next/link"
+import { useWallet } from "@solana/wallet-adapter-react"
 
 export function SiteNav({ variant = "landing" }: { variant?: "landing" | "app" }) {
+  const { publicKey, connected } = useWallet()
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/70 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -49,8 +53,10 @@ export function SiteNav({ variant = "landing" }: { variant?: "landing" | "app" }
               Create Link
             </Link>
             <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
-              <span className="h-2 w-2 rounded-full bg-accent" aria-hidden="true" />
-              <span className="font-mono text-xs text-muted-foreground">7xKX...gAsU</span>
+              <span className={`h-2 w-2 rounded-full ${connected ? "bg-accent" : "bg-muted-foreground"}`} aria-hidden="true" />
+              <span className="font-mono text-xs text-muted-foreground">
+                {publicKey ? publicKey.toString().slice(0, 4) + "..." + publicKey.toString().slice(-4) : "Not connected"}
+              </span>
             </div>
           </nav>
         )}

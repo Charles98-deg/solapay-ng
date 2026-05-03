@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Suspense, use, useState } from "react"
+import { Suspense, use, useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Check, Loader2, Lock, ShieldCheck, Wallet } from "lucide-react"
 import { useWallet, useConnection } from "@solana/wallet-adapter-react"
@@ -70,7 +70,20 @@ function PaymentContent({ id }: { id: string }) {
   const service = search.get("service") || "Service"
   const recipientAddress = search.get("wallet") || ""
   const amountParam = Number(search.get("amount"))
-  const amount = !Number.isNaN(amountParam) && amountParam > 0 ? amountParam : 0.01
+  const usdAmount = !Number.isNaN(amountParam) && amountParam > 0 ? amountParam : 1
+  const [amount, setAmount] = useState<number>(0)
+
+  useEffect(() => {
+    fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd")
+      .then(res => res.json())
+      .then(data => {
+        const price = data.solana.usd
+        setAmount(Number((usdAmount / price).toFixed(6)))
+      })
+      .catch(() => {
+        setAmount(Number((usdAmount / 150).toFixed(6)))
+      })
+  }, [usdAmount])
 
   const [status, setStatus] = useState<Status>("idle")
   const [txSignature, setTxSignature] = useState("")
@@ -137,12 +150,12 @@ function PaymentContent({ id }: { id: string }) {
           </p>
           <div className="mt-3 flex items-baseline justify-center gap-2">
             <span className="text-5xl font-bold tracking-tight sm:text-6xl">
-              {amount}
+              ${usdAmount}
             </span>
-            <span className="font-mono text-sm text-muted-foreground">SOL</span>
+            <span className="font-mono text-sm text-muted-foreground">USD</span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            Solana network · devnet
+            ≈ {amount} SOL · Solana network · devnet
           </p>
         </div>
 
