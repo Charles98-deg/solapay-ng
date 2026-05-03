@@ -141,7 +141,7 @@ const [name, setName] = useState("")
                   className="w-full rounded-lg border border-border bg-input px-4 py-3 pl-8 pr-20 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
                 <span className="absolute inset-y-0 right-4 flex items-center font-mono text-xs text-muted-foreground">
-                  USDC
+                  USD
                 </span>
               </div>
             </Field>
