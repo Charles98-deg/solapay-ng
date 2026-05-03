@@ -1,21 +1,72 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ArrowUpRight, Check, Copy, Plus, TrendingUp, Wallet, Receipt } from "lucide-react"
 import { SiteNav } from "@/components/site-nav"
-import { freelancer, recentPayments, shortAddress } from "@/lib/mock-data"
+import { shortAddress } from "@/lib/mock-data"
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
-import { useWallet } from "@solana/wallet-adapter-react"
+import { useWallet, useConnection } from "@solana/wallet-adapter-react"
+import { LAMPORTS_PER_SOL } from "@solana/web3.js"
+
+type TxItem = {
+  id: string
+  signature: string
+  amount: number
+  date: string
+}
 
 export default function DashboardPage() {
   const [copied, setCopied] = useState(false)
+  const [balance, setBalance] = useState<number | null>(null)
+  const [transactions, setTransactions] = useState<TxItem[]>([])
+  const [loading, setLoading] = useState(false)
   const { connected, publicKey } = useWallet()
+  const { connection } = useConnection()
+
+  useEffect(() => {
+    if (!connected || !publicKey) {
+      setBalance(null)
+      setTransactions([])
+      return
+    }
+
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const bal = await connection.getBalance(publicKey)
+        setBalance(bal / LAMPORTS_PER_SOL)
+
+        const signatures = await connection.getSignaturesForAddress(publicKey, { limit: 10 })
+
+        const txItems: TxItem[] = signatures.map((sig, i) => ({
+          id: i.toString(),
+          signature: sig.signature,
+          amount: 0,
+          date: sig.blockTime
+            ? new Date(sig.blockTime * 1000).toLocaleDateString("en-NG", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })
+            : "Unknown date",
+        }))
+
+        setTransactions(txItems)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [connected, publicKey, connection])
 
   const copyAddress = async () => {
+    if (!publicKey) return
     try {
-      const address = publicKey ? publicKey.toString() : freelancer.walletAddress
-      await navigator.clipboard.writeText(address)
+      await navigator.clipboard.writeText(publicKey.toString())
       setCopied(true)
       setTimeout(() => setCopied(false), 1600)
     } catch {
@@ -23,54 +74,53 @@ export default function DashboardPage() {
     }
   }
 
-  const displayAddress = publicKey ? publicKey.toString() : freelancer.walletAddress
-
   return (
     <main className="min-h-screen bg-background text-foreground">
       <SiteNav variant="app" />
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-        {/* Wallet Connect Banner */}
         {!connected && (
           <div className="mb-6 flex items-center justify-between rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4">
             <div>
               <p className="font-semibold text-accent">Connect your Solana wallet</p>
-              <p className="text-xs text-muted-foreground mt-1">Connect Phantom or Solflare to start receiving payments</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Connect Phantom or Solflare to start receiving payments
+              </p>
             </div>
             <WalletMultiButton style={{}} />
           </div>
         )}
 
-        {/* Profile + Create CTA */}
         <section className="flex flex-col gap-6 rounded-2xl border border-border bg-card p-5 sm:p-6">
           <div className="flex items-center gap-5">
-            <div>
-              <div
-                aria-hidden="true"
-                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full"
-                style={{ background: "linear-gradient(135deg, #9945FF 0%, #14F195 100%)" }}
-              >
-                {freelancer.name.split(" ").map((n) => n[0]).join("")}
-              </div>
+            <div
+              aria-hidden="true"
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-black font-bold text-lg"
+              style={{ background: "linear-gradient(135deg, #9945FF 0%, #14F195 100%)" }}
+            >
+              {publicKey ? publicKey.toString().slice(0, 2).toUpperCase() : "?"}
             </div>
             <div className="min-w-0">
-              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Welcome back</p>
+              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                Welcome back
+              </p>
               <h1 className="mt-1 truncate text-2xl font-bold tracking-tight sm:text-3xl">
-                {connected ? shortAddress(displayAddress, 6) : freelancer.name}
+                {publicKey ? shortAddress(publicKey.toString(), 6) : "Not connected"}
               </h1>
-              <button
-                onClick={copyAddress}
-                className="mt-2 inline-flex items-center gap-2 rounded-md bg-secondary px-3 py-1 text-xs"
-                aria-label="Copy wallet address"
-              >
-                <Wallet className="h-3 w-3" aria-hidden="true" />
-                {shortAddress(displayAddress, 6)}
-                {copied ? (
-                  <Check className="h-3 w-3 text-accent" aria-hidden="true" />
-                ) : (
-                  <Copy className="h-3 w-3" aria-hidden="true" />
-                )}
-              </button>
+              {publicKey && (
+                <button
+                  onClick={copyAddress}
+                  className="mt-2 inline-flex items-center gap-2 rounded-md bg-secondary px-3 py-1 text-xs"
+                >
+                  <Wallet className="h-3 w-3" />
+                  {shortAddress(publicKey.toString(), 6)}
+                  {copied ? (
+                    <Check className="h-3 w-3 text-accent" />
+                  ) : (
+                    <Copy className="h-3 w-3" />
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
@@ -78,75 +128,97 @@ export default function DashboardPage() {
             href="/create"
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-black"
           >
-            <Plus className="h-4 w-4" aria-hidden="true" />
+            <Plus className="h-4 w-4" />
             Create Payment Link
           </Link>
         </section>
 
-        {/* Stats */}
         <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <StatCard
-            label="Total earnings"
-            value={`$${freelancer.totalEarnings.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-            sub="USDC"
-            icon={<TrendingUp className="h-4 w-4" aria-hidden="true" />}
+            label="SOL Balance"
+            value={balance !== null ? `${balance.toFixed(4)} SOL` : connected ? "Loading..." : "—"}
+            sub="Devnet"
+            icon={<TrendingUp className="h-4 w-4" />}
             accent="green"
             primary
           />
           <StatCard
-            label="Payments received"
-            value={freelancer.paymentsCount.toString()}
-            sub="Lifetime"
-            icon={<Receipt className="h-4 w-4" aria-hidden="true" />}
+            label="Transactions"
+            value={connected ? transactions.length.toString() : "—"}
+            sub="Last 10 on-chain"
+            icon={<Receipt className="h-4 w-4" />}
           />
           <StatCard
-            label="Average payment"
-            value={`$${freelancer.avgPayment.toFixed(2)}`}
-            sub="USDC / invoice"
-            icon={<Wallet className="h-4 w-4" aria-hidden="true" />}
+            label="Wallet"
+            value={publicKey ? shortAddress(publicKey.toString(), 4) : "—"}
+            sub="Connected"
+            icon={<Wallet className="h-4 w-4" />}
           />
         </section>
 
-        {/* Recent payments */}
         <section className="mt-8 overflow-hidden rounded-2xl border border-border bg-card">
           <header className="flex items-center justify-between border-b border-border px-5 py-4">
             <div>
-              <h2 className="text-base font-semibold tracking-tight sm:text-lg">Recent payments</h2>
-              <p className="text-xs text-muted-foreground">Settled directly to your Solana wallet</p>
+              <h2 className="text-base font-semibold tracking-tight sm:text-lg">
+                Recent transactions
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                On-chain activity for your wallet
+              </p>
             </div>
             <span className="rounded-full border border-border bg-secondary px-3 py-1 text-xs">
-              {recentPayments.length} this month
+              {transactions.length} found
             </span>
           </header>
 
-          <ul role="list" className="divide-y divide-border">
-            {recentPayments.map((p) => (
-              <li
-                key={p.id}
-                className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-secondary/40"
-              >
-                <div className="flex min-w-0 items-center gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
-                    <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{p.client}</p>
-                    <p className="truncate text-xs text-muted-foreground">{p.service}</p>
-                  </div>
-                </div>
+          {!connected && (
+            <div className="px-5 py-12 text-center text-sm text-muted-foreground">
+              Connect your wallet to see transaction history
+            </div>
+          )}
 
-                <div className="flex shrink-0 items-center gap-6 text-right">
-                  <div className="hidden font-mono text-xs text-muted-foreground sm:block">
-                    {p.txHash}
+          {connected && loading && (
+            <div className="px-5 py-12 text-center text-sm text-muted-foreground">
+              Loading transactions...
+            </div>
+          )}
+
+          {connected && !loading && transactions.length === 0 && (
+            <div className="px-5 py-12 text-center text-sm text-muted-foreground">
+              No transactions yet. Create a payment link to get started.
+            </div>
+          )}
+
+          {connected && !loading && transactions.length > 0 && (
+            <ul role="list" className="divide-y divide-border">
+              {transactions.map((tx) => (
+                <li
+                  key={tx.id}
+                  className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-secondary/40"
+                >
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
+                      <ArrowUpRight className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-mono text-xs text-muted-foreground">
+                        {tx.signature.slice(0, 20)}...
+                      </p>
+                      <p className="text-xs text-muted-foreground">{tx.date}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold">+${p.amount.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">{p.date}</p>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+                  
+                    href={"https://explorer.solana.com/tx/" + tx.signature + "?cluster=devnet"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-purple-400 underline shrink-0"
+                  >
+                    View
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </div>
     </main>
