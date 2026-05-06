@@ -13,7 +13,9 @@ import {
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { clusterApiUrl } from "@solana/web3.js";
+import { clusterApiUrl } from "@solana/web3.js"
+
+const HELIUS_RPC = "https://devnet.helius-rpc.com/?api-key=5bda2745-8195-48a2-9167-21b47e5470a9";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -28,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const network = WalletAdapterNetwork.Devnet;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const endpoint = useMemo(() => HELIUS_RPC, []);
   const wallets = useMemo(
     () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
     [network]
